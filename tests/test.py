@@ -1,13 +1,14 @@
 import unittest
 from selenium import webdriver
 from pyshadow.main import Shadow
+from webdriver_manager.chrome import ChromeDriverManager
 import os
 
 
 class TestShadowFeatures(unittest.TestCase):
 
     def setUp(self):
-        self.driver = webdriver.Chrome()
+        self.driver = webdriver.Chrome(ChromeDriverManager().install())
 
     def tearDown(self):
         self.driver.close()
