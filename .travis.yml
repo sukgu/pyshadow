@@ -1,6 +1,7 @@
 language: python
 dist: xenial
-
+services:
+  - xvfb
 
 addons:
   chrome: stable
@@ -16,11 +17,6 @@ before_script:
   - 'export DISPLAY=:99.0'
   - 'export TRAVIS=true'
   - 'export DEBUG=true'
-  - 'sudo sh -e /etc/init.d/xvfb start'
-  - sleep 3
-
-after_script:
-  - "sudo sh -e /etc/init.d/xvfb stop"
 
 script:
   - python -m unittest tests.test
