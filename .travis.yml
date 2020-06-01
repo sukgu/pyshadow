@@ -1,7 +1,31 @@
 language: python
+sudo: false
+dist: trusty
+services:
+  - xvfb
+
+addons:
+  chrome: stable
+  apt:
+    packages:
+      - xvfb
 python:
   - "3.7"
 install:
   - pip install -r requirements.txt
+
+before_script:
+  - 'export DISPLAY=:99.0'
+  - 'export TRAVIS=true'
+  - 'export DEBUG=true'
+  - 'sh -e /etc/init.d/xvfb start'
+  - sleep 3
+
+after_script:
+  - "sh -e /etc/init.d/xvfb stop"
+
 script:
   - python -m unittest tests.test
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
