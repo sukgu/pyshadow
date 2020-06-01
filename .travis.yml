@@ -1,7 +1,6 @@
 language: python
-sudo: false
-services:
-  - xvfb
+dist: xenial
+
 
 addons:
   chrome: stable
