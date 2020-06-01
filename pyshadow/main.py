@@ -8,13 +8,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from io import StringIO
 from multipledispatch import dispatch
 import time
+import os
 
 
 class Shadow:
     @staticmethod
     def convert_js_to_text():
         text = StringIO()
-        file = open('../resources/querySelector.js', 'r')
+        cwd = os.path.dirname(os.path.realpath(__file__))
+        file_location = os.path.join(cwd, "../resources", "querySelector.js")
+        file = open(file_location, 'r')
         lines = file.readlines()
         for line in lines:
             text.write(line)
