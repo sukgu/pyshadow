@@ -47,7 +47,7 @@ class TestShadowFeatures(unittest.TestCase):
         print("cwd path is " + cwd)
         test_file_location = os.path.join(cwd, "resources/test", page_name)
         print("test_file_location is "+test_file_location)
-        return test_file_location
+        return "file:///"+test_file_location
 
 
 if __name__ == '__main__':
