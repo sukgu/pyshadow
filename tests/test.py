@@ -2,13 +2,16 @@ import unittest
 from selenium import webdriver
 from pyshadow.main import Shadow
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 import os
 
 
 class TestShadowFeatures(unittest.TestCase):
 
     def setUp(self):
-        self.driver = webdriver.Chrome(ChromeDriverManager().install())
+        chrome_options = Options()
+        chrome_options.add_argument("--allow-file-access-from-files")
+        self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_options)
 
     def tearDown(self):
         self.driver.close()
