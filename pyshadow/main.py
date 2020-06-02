@@ -16,7 +16,7 @@ class Shadow:
     def convert_js_to_text():
         text = StringIO()
         cwd = os.path.dirname(os.path.realpath(__file__))
-        file_location = os.path.join(cwd, "../resources", "querySelector.js")
+        file_location = os.path.join(cwd, "resources", "querySelector.js")
         file = open(file_location, 'r')
         lines = file.readlines()
         for line in lines:
