@@ -41,7 +41,11 @@ class TestShadowFeatures(unittest.TestCase):
     def get_page_location(page_name):
         cwd = os.path.dirname(os.path.realpath(__file__))
         print("cwd path is " + cwd)
-        test_file_location = os.path.join(cwd, "../resources/test", page_name)
+        #os.chdir("..")
+        cwd_t = os.getcwd()
+        print("cwd_t  "+cwd_t)
+        test_file_location = os.path.join(cwd, "resources/test", page_name)
+        os.chdir("")
         print("test_file_location is "+test_file_location)
         return test_file_location
 
