@@ -20,7 +20,7 @@ before_script:
   - 'export DEBUG=true'
 
 script:
-  - coverage run tests.test.py
+  - coverage run tests/test.py
 
 after_success:
   - codecov
