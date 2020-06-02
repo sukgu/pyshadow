@@ -12,6 +12,7 @@ python:
   - "3.7"
 install:
   - pip install -r requirements.txt
+  - pip install codecov
 
 before_script:
   - 'export DISPLAY=:99.0'
@@ -19,7 +20,7 @@ before_script:
   - 'export DEBUG=true'
 
 script:
-  - python -m unittest tests.test
+  - coverage run tests.test.py
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - codecov
