@@ -3,6 +3,7 @@ Selenium plugin to manage multi level shadow DOM elements on web page.
 
 [![Build Status](https://travis-ci.com/sukgu/pyshadow.svg?branch=master)](https://travis-ci.com/sukgu/pyshadow "Travis CI")
 [![codecov](https://codecov.io/gh/sukgu/pyshadow/branch/master/graph/badge.svg)](https://codecov.io/gh/sukgu/pyshadow)
+[![PyPI version shields.io](https://img.shields.io/pypi/v/pyshadow.svg)](https://pypi.python.org/pypi/pyshadow)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Shadow DOM:
