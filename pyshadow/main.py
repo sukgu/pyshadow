@@ -88,13 +88,11 @@ class Shadow:
         element = None
         command = "return getObject('{attr}');".format(attr=css_selector)
         if self.__implicit_wait > 0:
-            print(element)
             time.sleep(self.__implicit_wait)
             element = self.executor_get_object(command)
 
         if self.__explicit_wait > 0:
             element = self.executor_get_object(command)
-            print(element)
             count = 0
             while count < self.__explicit_wait and element is None:
                 time.sleep(self.__polling_time)
@@ -131,6 +129,56 @@ class Shadow:
             element = self.executor_get_object(command, parent)
 
         if element is None or self.is_present(element) is False:
+            raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
+
+        return element
+
+    @dispatch(str)
+    def find_elements(self, css_selector):
+        element = None
+        command = "return getAllObject('{attr}');".format(attr=css_selector)
+        if self.__implicit_wait > 0:
+            time.sleep(self.__implicit_wait)
+            element = self.executor_get_object(command)
+
+        if self.__explicit_wait > 0:
+            element = self.executor_get_object(command)
+            count = 0
+            while count < self.__explicit_wait and element is None:
+                time.sleep(self.__polling_time)
+                element = self.executor_get_object(command)
+                count = count + 1
+
+        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+            element = self.executor_get_object(command)
+
+        if element is None:
+            raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
+
+        return element
+
+    @dispatch(object, str)
+    def find_elements(self, parent, css_selector):
+        element = None
+        command = "return getAllObject('{attr}', arguments[0]);".format(attr=css_selector)
+        if self.__implicit_wait > 0:
+            print(element)
+            time.sleep(self.__implicit_wait)
+            element = self.executor_get_object(command, parent)
+
+        if self.__explicit_wait > 0:
+            element = self.executor_get_object(command, parent)
+            print(element)
+            count = 0
+            while count < self.__explicit_wait and element is None:
+                time.sleep(self.__polling_time)
+                element = self.executor_get_object(command, parent)
+                count = count + 1
+
+        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+            element = self.executor_get_object(command, parent)
+
+        if element is None:
             raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
 
         return element
@@ -186,6 +234,7 @@ class Shadow:
 
     def is_present(self, element):
         present = self.executor_get_object("return isVisible(arguments[0]);", element)
+        print("QA--QAQA "+ str(present))
         return present
 
     @dispatch(str)
