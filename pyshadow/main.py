@@ -84,7 +84,7 @@ class Shadow:
         return self.inject_shadow_executor(javascript, element)
 
     @dispatch(str)
-    def find_element(self, css_selector):
+    def find_element(self, css_selector, force_find=False):
         element = None
         command = "return getObject('{attr}');".format(attr=css_selector)
         if self.__implicit_wait > 0:
@@ -102,13 +102,14 @@ class Shadow:
         if self.__implicit_wait == 0 and self.__implicit_wait == 0:
             element = self.executor_get_object(command)
 
-        if element is None or self.is_present(element) is False:
-            raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
+        if force_find is False:
+            if element is None or self.is_present(element) is False:
+                raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
 
         return element
 
     @dispatch(object, str)
-    def find_element(self, parent, css_selector):
+    def find_element(self, parent, css_selector, force_find=False):
         element = None
         command = "return getObject('{attr}', arguments[0]);".format(attr=css_selector)
         if self.__implicit_wait > 0:
@@ -128,8 +129,9 @@ class Shadow:
         if self.__implicit_wait == 0 and self.__implicit_wait == 0:
             element = self.executor_get_object(command, parent)
 
-        if element is None or self.is_present(element) is False:
-            raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
+        if force_find is False:
+            if element is None or self.is_present(element) is False:
+                raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
 
         return element
 
