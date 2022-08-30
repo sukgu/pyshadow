@@ -3,7 +3,7 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.chrome.webdriver import WebDriver as ChromeDriver
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 from selenium.webdriver.ie.webdriver import WebDriver as InternetExplorerDriver
-from selenium.webdriver.remote import webdriver as remote_web_driver
+from selenium.webdriver.remote.webdriver import WebDriver as RemoteDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from io import StringIO
 from multipledispatch import dispatch
@@ -35,7 +35,7 @@ class Shadow:
         elif isinstance(driver, InternetExplorerDriver):
             self.session_id = driver.session_id
             self.ie_driver = driver
-        elif isinstance(driver, remote_web_driver):
+        elif isinstance(driver, RemoteDriver):
             self.session_id = driver.session_id
             self.remote_driver = driver
         self.driver = driver
