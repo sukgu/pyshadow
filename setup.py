@@ -5,7 +5,7 @@ from setuptools import setup
 setup(
     name='pyshadow',
     description='Selenium plugin to manage shadow DOM elements on web page.',
-    version='0.0.3',
+    version='0.0.5',
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     license="Apache License 2",
