@@ -1,4 +1,4 @@
-from selenium.common.exceptions import ElementNotVisibleException
+from selenium.common.exceptions import ElementNotVisibleException, TimeoutException
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.chrome.webdriver import WebDriver as ChromeDriver
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
@@ -50,11 +50,10 @@ class Shadow:
             self.__implicit_wait = seconds
 
     def set_explicit_wait(self, seconds, polling):
-        if seconds <= polling and not seconds < 0:
-            raise Exception("polling time can't be greater than wait time")
-        if seconds > 0:
-            self.__explicit_wait = seconds
-            self.__polling_time = polling
+        if seconds < 0:
+            raise Exception("polling time can't be lower than zero")
+        self.__explicit_wait = seconds
+        self.__polling_time = polling
 
     def wait_for_page_loaded(self):
         try:
@@ -90,30 +89,43 @@ class Shadow:
         javascript = Shadow.javascript_library
         javascript += script
         return self.inject_shadow_executor(javascript, element)
-
-    @dispatch(str)
-    def find_element(self, css_selector, force_find=False):
-        element = None
-        css_selector = self.__sanitize_quotes(css_selector)
-        command = "return getObject('{attr}');".format(attr=css_selector)
+    
+    def _get_element_object(self, command, parent=None):
+        args = [command]
+        if parent:
+            args.append(parent)
         if self.__implicit_wait > 0:
             time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command)
+            element = self.executor_get_object(*args)
 
         if self.__explicit_wait > 0:
-            element = self.executor_get_object(command)
-            count = 0
-            while count < self.__explicit_wait and element is None:
+            start_time = time.time()
+            element = None
+            while ( time.time() - start_time )  <= self.__explicit_wait and not element:
                 time.sleep(self.__polling_time)
-                element = self.executor_get_object(command)
-                count = count + 1
+                element = self.executor_get_object(*args)
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command)
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
+            element = self.executor_get_object(*args)
+        return element
+        
+    def _validate_exception(self, selector, element, force_find=False, elem_type='xpath'):
+        if force_find:
+            return
+        exception = ElementNotVisibleException
+        if self.__explicit_wait:
+            exception = TimeoutException
+        if element is None or (type(element) != list and not self.is_present(element)):
+            raise exception(f"Element with {elem_type} {selector} is not present")
 
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
+    @dispatch(object, str, bool)
+    def find_element(self, parent, css_selector, force_find):
+        element = None
+        css_selector = self.__sanitize_quotes(css_selector)
+        command = "return getObject('{attr}', arguments[0]);".format(attr=css_selector)
+        element = self._get_element_object(command, parent)
+        self._validate_exception(selector=css_selector, element=element, 
+                                 force_find=force_find, elem_type='css')        
 
         return element
 
@@ -122,24 +134,9 @@ class Shadow:
         element = None
         css_selector = self.__sanitize_quotes(css_selector)
         command = "return getObject('{attr}', arguments[0]);".format(attr=css_selector)
-        if self.__implicit_wait > 0:
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command, parent)
-
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command, parent)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command, parent)
-                count = count + 1
-
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command, parent)
-
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
+        element = self._get_element_object(command, parent)
+        self._validate_exception(selector=css_selector, element=element, 
+                                 force_find=force_find, elem_type='css')        
 
         return element
 
@@ -148,101 +145,72 @@ class Shadow:
         element = None
         css_selector = self.__sanitize_quotes(css_selector)
         command = "return getObject('{attr}');".format(attr=css_selector)
-        if self.__implicit_wait > 0:
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command)
+        element = self._get_element_object(command)
 
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command)
-                count = count + 1
+        self._validate_exception(selector=css_selector, element=element, 
+                                 force_find=force_find, elem_type='css')
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command)
+        return element
 
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
+
+    @dispatch(str)
+    def find_element(self, css_selector, force_find=False):
+        element = None
+        css_selector = self.__sanitize_quotes(css_selector)
+        command = "return getObject('{attr}');".format(attr=css_selector)
+        element = self._get_element_object(command)
+
+        self._validate_exception(selector=css_selector, element=element, 
+                                 force_find=force_find, elem_type='css')
+
+        return element
+    
+
+    @dispatch(str, bool)
+    def find_elements(self, css_selector, force_find):
+        element = None
+        css_selector = self.__sanitize_quotes(css_selector)
+        command = "return getAllObject('{attr}');".format(attr=css_selector)
+        element = self._get_element_object(command)
+
+        self._validate_exception(selector=css_selector, element=element, 
+                                 force_find=force_find, elem_type='css')
+
+        return element
+    
+    @dispatch(str)
+    def find_elements(self, css_selector, force_find=False):
+        element = None
+        css_selector = self.__sanitize_quotes(css_selector)
+        command = "return getAllObject('{attr}');".format(attr=css_selector)
+        element = self._get_element_object(command)
+
+        self._validate_exception(selector=css_selector, element=element, 
+                                 force_find=force_find, elem_type='css')
 
         return element
 
     @dispatch(object, str, bool)
-    def find_element(self, parent, css_selector, force_find):
-        element = None
-        css_selector = self.__sanitize_quotes(css_selector)
-        command = "return getObject('{attr}', arguments[0]);".format(attr=css_selector)
-        if self.__implicit_wait > 0:
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command, parent)
-
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command, parent)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command, parent)
-                count = count + 1
-
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command, parent)
-
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
-
-        return element
-
-    @dispatch(str)
-    def find_elements(self, css_selector):
-        element = None
-        css_selector = self.__sanitize_quotes(css_selector)
-        command = "return getAllObject('{attr}');".format(attr=css_selector)
-        if self.__implicit_wait > 0:
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command)
-
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command)
-                count = count + 1
-
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command)
-
-        if element is None:
-            raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
-
-        return element
-
-    @dispatch(object, str)
-    def find_elements(self, parent, css_selector):
+    def find_elements(self, parent, css_selector, force_find):
         element = None
         css_selector = self.__sanitize_quotes(css_selector)
         command = "return getAllObject('{attr}', arguments[0]);".format(attr=css_selector)
-        if self.__implicit_wait > 0:
-            print(element)
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command, parent)
+        element = self._get_element_object(command, parent)
 
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command, parent)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command, parent)
-                count = count + 1
+        self._validate_exception(selector=css_selector, element=element, 
+                                 force_find=force_find, elem_type='css')
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command, parent)
+        return element
+    
+    @dispatch(object, str)
+    def find_elements(self, parent, css_selector, force_find=False):
+        element = None
+        css_selector = self.__sanitize_quotes(css_selector)
+        command = "return getAllObject('{attr}', arguments[0]);".format(attr=css_selector)
+        element = self._get_element_object(command, parent)
 
-        if element is None:
-            raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
+        self._validate_exception(selector=css_selector, element=element, 
+                                 force_find=force_find, elem_type='css')
 
         return element
 
@@ -251,76 +219,22 @@ class Shadow:
         element = None
         xpath = self.__sanitize_quotes(xpath)
         command = "return getXPathObject('{attr}');".format(attr=xpath)
-        if self.__implicit_wait > 0:
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command)
+        element = self._get_element_object(command)
 
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command)
-                count = count + 1
-
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command)
-
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
+        self._validate_exception(selector=xpath, element=element, 
+                                 force_find=force_find, elem_type='xpath')
 
         return element
-
+    
     @dispatch(str)
     def find_element_by_xpath(self, xpath, force_find=False):
         element = None
         xpath = self.__sanitize_quotes(xpath)
         command = "return getXPathObject('{attr}');".format(attr=xpath)
-        if self.__implicit_wait > 0:
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command)
+        element = self._get_element_object(command)
 
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command)
-                count = count + 1
-
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command)
-
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
-
-        return element
-
-    @dispatch(object, str)
-    def find_element_by_xpath(self, parent, xpath, force_find=False):
-        element = None
-        xpath = self.__sanitize_quotes(xpath)
-        command = "return getXPathObject('{attr}', arguments[0]);".format(attr=xpath)
-        if self.__implicit_wait > 0:
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command, parent)
-
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command, parent)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command, parent)
-                count = count + 1
-
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command, parent)
-
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
+        self._validate_exception(selector=xpath, element=element, 
+                                 force_find=force_find, elem_type='xpath')
 
         return element
 
@@ -329,78 +243,23 @@ class Shadow:
         element = None
         xpath = self.__sanitize_quotes(xpath)
         command = "return getXPathObject('{attr}', arguments[0]);".format(attr=xpath)
-        if self.__implicit_wait > 0:
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command, parent)
+        element = self._get_element_object(command, parent)
 
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command, parent)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command, parent)
-                count = count + 1
-
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command, parent)
-
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
-
-        return element
-
-    @dispatch(str)
-    def find_elements_by_xpath(self, xpath, force_find=False):
-        element = None
-        xpath = self.__sanitize_quotes(xpath)
-        command = "return getXPathAllObject('{attr}');".format(attr=xpath)
-        if self.__implicit_wait > 0:
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command)
-
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command)
-                count = count + 1
-
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command)
-
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
-
+        self._validate_exception(selector=xpath, element=element, 
+                                 force_find=force_find, elem_type='xpath')
+    
         return element
 
     @dispatch(object, str)
-    def find_elements_by_xpath(self, parent, xpath, force_find=False):
+    def find_element_by_xpath(self, parent, xpath, force_find=False):
         element = None
         xpath = self.__sanitize_quotes(xpath)
-        command = "return getXPathAllObject('{attr}', arguments[0]);".format(attr=xpath)
-        if self.__implicit_wait > 0:
-            print(element)
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command, parent)
+        command = "return getXPathObject('{attr}', arguments[0]);".format(attr=xpath)
+        element = self._get_element_object(command, parent)
 
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command, parent)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command, parent)
-                count = count + 1
-
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command, parent)
-
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
-
+        self._validate_exception(selector=xpath, element=element, 
+                                 force_find=force_find, elem_type='xpath')
+    
         return element
 
     @dispatch(str, bool)
@@ -408,52 +267,47 @@ class Shadow:
         element = None
         xpath = self.__sanitize_quotes(xpath)
         command = "return getXPathAllObject('{attr}');".format(attr=xpath)
-        if self.__implicit_wait > 0:
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command)
-
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command)
-                count = count + 1
-
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command)
-
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
-
+        element = self._get_element_object(command)
+        
+        self._validate_exception(selector=xpath, element=element, 
+                                 force_find=force_find, elem_type='xpath')
+        
+        return element
+    
+    @dispatch(str)
+    def find_elements_by_xpath(self, xpath, force_find=False):
+        element = None
+        xpath = self.__sanitize_quotes(xpath)
+        command = "return getXPathAllObject('{attr}');".format(attr=xpath)
+        element = self._get_element_object(command)
+        
+        self._validate_exception(selector=xpath, element=element, 
+                                 force_find=force_find, elem_type='xpath')
+        
         return element
 
-    @dispatch(object, str, bool)
+    @dispatch(object, str)
     def find_elements_by_xpath(self, parent, xpath, force_find):
         element = None
         xpath = self.__sanitize_quotes(xpath)
         command = "return getXPathAllObject('{attr}', arguments[0]);".format(attr=xpath)
-        if self.__implicit_wait > 0:
-            print(element)
-            time.sleep(self.__implicit_wait)
-            element = self.executor_get_object(command, parent)
+        element = self._get_element_object(command, parent)
 
-        if self.__explicit_wait > 0:
-            element = self.executor_get_object(command, parent)
-            count = 0
-            while count < self.__explicit_wait and element is None:
-                time.sleep(self.__polling_time)
-                element = self.executor_get_object(command, parent)
-                count = count + 1
+        self._validate_exception(selector=xpath, element=element, 
+                                 force_find=force_find, elem_type='xpath')
+        
+        return element
+    
+    @dispatch(object, str, bool)
+    def find_elements_by_xpath(self, parent, xpath, force_find=False):
+        element = None
+        xpath = self.__sanitize_quotes(xpath)
+        command = "return getXPathAllObject('{attr}', arguments[0]);".format(attr=xpath)
+        element = self._get_element_object(command, parent)
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
-            element = self.executor_get_object(command, parent)
-
-        if force_find is False:
-            if element is None or self.is_present(element) is False:
-                raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
-
+        self._validate_exception(selector=xpath, element=element, 
+                                 force_find=force_find, elem_type='xpath')
+        
         return element
 
     def get_attribute(self, element, attribute):
