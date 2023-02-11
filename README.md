@@ -72,55 +72,82 @@ You can use this plugin by adding jar file or by including maven dependency in y
   
   `scroll_to(object element)` : use this to scroll to web element.
   
-###### How to use this plugin:
-  You will have to install this plugin from PyPi.
-  
+## Installing  
   **Maven**
   ```
   pip install pyshadow
   ```
   
-## Selector:
-  ###### Examples: 
-  for html tag ``` <paper-tab title="Settings"> ```
-  You can use this code in your framework to grab the paper-tab element Object.
-  ```python
+## Examples
+### Importing modules and calling methods from _webdriver_ and _pyshadow_:
+```python
 from selenium import webdriver
 from pyshadow.main import Shadow
 from webdriver_manager.chrome import ChromeDriverManager
 driver = webdriver.Chrome(ChromeDriverManager().install())
 shadow = Shadow(driver)
+```
+
+### Selecting one element:
+For element ``` <paper-tab title="Settings"> ```, you can use this code in your framework to grab the *paper-tab* element Object. The code below returns element based on CSS selector: 
+ 
+```python
+...
 element = shadow.find_element("paper-tab[title='Settings']")
-elements = shadow.find_elements("paper-tab[title='Settings']")
 text = element.text
-  ```
-  for html tag that resides under a shadow-root dom element ``` <input title="The name of the employee"> ```
-  You can use this code in your framework to grab the paper-tab element Object.
-  ```python
-from selenium import webdriver
-from pyshadow.main import Shadow
-from webdriver_manager.chrome import ChromeDriverManager
-driver = webdriver.Chrome(ChromeDriverManager().install())
-shadow = Shadow(driver)
-element = shadow.find_element("input[title='The name of the employee']")
-text = element.text
-  ```
-  for html tag that resides under a shadow-root dom element 
-  ```html 
+```
+ 
+### Selecting elements:
+For element that resides under a _shadow-root_ dom element ``` <input class="employee_input"> ```, you can use this code in your framework to grab the _paper-tab_ element Object.
+
+```python
+...
+elements = shadow.find_elements("input[title='The name of the employee']")
+for content in elements:
+    text = content.text
+```
+After this, you can do the handle of content for your case.
+
+
+### Selecting nested elements under shadow-root
+ For html tag that resides under a shadow-root dom element ex: 
+```html 
 <properties-page id="settingsPage"> 
     <textarea id="textarea">
 </properties-page>
-  ```
-  You can use this code in your framework to grab the textarea element Object.
-  ```python
-from selenium import webdriver
-from pyshadow.main import Shadow
-from webdriver_manager.chrome import ChromeDriverManager
-driver = webdriver.Chrome(ChromeDriverManager().install())
-shadow = Shadow(driver)
+```
+ You can use this code in your framework to grab the textarea element Object.
+ 
+```python
+...
 element = shadow.find_element("properties-page#settingsPage>textarea#textarea")
 text = element.text
-  ```
+```
+  
+### Tips
+You can set de selector CSS or Xpath in variables and call in _pyshadow_ methods.
+
+Sometimes you should select elements before, to select the target element, for example:
+```html
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Dropdown Example
+  <span class="caret"></span></button>
+  <ul class="dropdown-menu">
+    <li><a href="#">HTML</a></li>
+    <li><a href="#">CSS</a></li>
+    <li><a href="#">JavaScript</a></li>
+  </ul>
+</div>
+```
+To select all elements in dropdown, you can do:
+
+```python
+...
+elements = shadow.find_elements("div[class='dropdown']>ul[class='dropdown-menu']")
+for content in elements:
+    text = content.text
+```
+
   
   ## Wait: Implicit and Explicit
 If you want to use wait to synchronize your scripts then you should use the implicit or explicit wait feature.
