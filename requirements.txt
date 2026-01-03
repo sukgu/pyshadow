@@ -2,3 +2,4 @@ selenium==4.39.0
 multipledispatch==1.0.0
 webdriver-manager==4.0.2
 pytest
+pytest-cov
