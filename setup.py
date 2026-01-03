@@ -12,7 +12,7 @@ setup(
     author='Sushil Gupta',
     author_email='sushil106768@gmail.com',
     url='https://github.com/sukgu/pyshadow/',
-    install_requires=['multipledispatch>=0.6.0', 'selenium>=3.141.0', 'webdriver-manager>=2.5.3'],
+    install_requires=['multipledispatch>=1.0.0', 'selenium>=4.15.1', 'webdriver-manager>=4.0.2'],
     python_requires='>=3.7',
     packages=setuptools.find_packages(),
     package_data={
