@@ -201,7 +201,7 @@ class TestShadowFeatures(unittest.TestCase):
     @staticmethod
     def get_page_location(page_name):
         cwd = os.getcwd()
-        #cwd = os.path.dirname(os.path.realpath(__file__))
+        ##cwd = os.path.dirname(os.path.realpath(__file__))
         print("cwd path is " + cwd)
         test_file_location = os.path.join(cwd, "pyshadow/resources/test", page_name)
         print("test_file_location is "+test_file_location)
