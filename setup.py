@@ -5,8 +5,8 @@ from setuptools import setup
 setup(
     name='pyshadow',
     description='Selenium plugin to manage shadow DOM elements on web page.',
-    version='0.0.5',
-    long_description=open("README.md").read(),
+    version='0.0.6',
+    long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     license="Apache License 2",
     author='Sushil Gupta',
@@ -17,7 +17,7 @@ setup(
     packages=setuptools.find_packages(),
     package_data={
         # And include any *.dat files found in the "data" subdirectory
-        # of the "mypkg" package, also:
+        # of the "pyshadow" package, also:
         "pyshadow": ["resources/test/*", "resources/*"],
     },
     classifiers=[
