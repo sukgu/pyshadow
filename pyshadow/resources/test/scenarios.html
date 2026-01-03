@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Scenarios</title>
+</head>
+<body>
+    <div id="shadow-host"></div>
+
+    <script>
+        const host = document.getElementById('shadow-host');
+        const shadow = host.attachShadow({mode: 'open'});
+
+        // Container for traversal tests
+        const container = document.createElement('div');
+        container.id = 'container';
+
+        const item1 = document.createElement('div');
+        item1.id = 'item1';
+        item1.className = 'item';
+        item1.textContent = 'Item 1';
+        item1.setAttribute('data-attr', 'value1');
+
+        const item2 = document.createElement('div');
+        item2.id = 'item2';
+        item2.className = 'item';
+        item2.textContent = 'Item 2';
+
+        const item3 = document.createElement('div');
+        item3.id = 'item3';
+        item3.className = 'item';
+        item3.textContent = 'Item 3';
+
+        const hiddenItem = document.createElement('div');
+        hiddenItem.id = 'hidden-item';
+        hiddenItem.style.display = 'none';
+        hiddenItem.textContent = 'Hidden';
+
+        container.appendChild(item1);
+        container.appendChild(item2);
+        container.appendChild(item3);
+        container.appendChild(hiddenItem);
+
+        shadow.appendChild(container);
+
+        // Form Elements
+        const formContainer = document.createElement('div');
+        formContainer.id = 'form-container';
+
+        const checkboxChecked = document.createElement('input');
+        checkboxChecked.type = 'checkbox';
+        checkboxChecked.id = 'chk-checked';
+        checkboxChecked.checked = true;
+
+        const checkboxDisabled = document.createElement('input');
+        checkboxDisabled.type = 'checkbox';
+        checkboxDisabled.id = 'chk-disabled';
+        checkboxDisabled.disabled = true;
+
+        formContainer.appendChild(checkboxChecked);
+        formContainer.appendChild(checkboxDisabled);
+
+        shadow.appendChild(formContainer);
+
+        // Mock Polymer Elements for future testing
+        const pCheckbox = document.createElement('paper-checkbox');
+        pCheckbox.textContent = 'Polymer Checkbox';
+        shadow.appendChild(pCheckbox);
+    </script>
+</body>
+</html>
