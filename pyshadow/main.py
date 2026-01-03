@@ -108,10 +108,10 @@ class Shadow:
                 element = self.executor_get_object(command)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command)
 
-        if force_find is False:
+        if not force_find:
             if element is None or self.is_present(element) is False:
                 raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
 
@@ -134,10 +134,10 @@ class Shadow:
                 element = self.executor_get_object(command, parent)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command, parent)
 
-        if force_find is False:
+        if not force_find:
             if element is None or self.is_present(element) is False:
                 raise ElementNotVisibleException("Element with CSS " + css_selector + " is not present on screen")
 
@@ -160,7 +160,7 @@ class Shadow:
                 element = self.executor_get_object(command)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command)
 
         if force_find is False:
@@ -186,7 +186,7 @@ class Shadow:
                 element = self.executor_get_object(command, parent)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command, parent)
 
         if force_find is False:
@@ -212,7 +212,7 @@ class Shadow:
                 element = self.executor_get_object(command)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command)
 
         if element is None:
@@ -238,7 +238,7 @@ class Shadow:
                 element = self.executor_get_object(command, parent)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command, parent)
 
         if element is None:
@@ -263,7 +263,7 @@ class Shadow:
                 element = self.executor_get_object(command)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command)
 
         if force_find is False:
@@ -289,10 +289,10 @@ class Shadow:
                 element = self.executor_get_object(command)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command)
 
-        if force_find is False:
+        if not force_find:
             if element is None or self.is_present(element) is False:
                 raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
 
@@ -315,10 +315,10 @@ class Shadow:
                 element = self.executor_get_object(command, parent)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command, parent)
 
-        if force_find is False:
+        if not force_find:
             if element is None or self.is_present(element) is False:
                 raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
 
@@ -341,7 +341,7 @@ class Shadow:
                 element = self.executor_get_object(command, parent)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command, parent)
 
         if force_find is False:
@@ -367,10 +367,10 @@ class Shadow:
                 element = self.executor_get_object(command)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command)
 
-        if force_find is False:
+        if not force_find:
             if element is None or self.is_present(element) is False:
                 raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
 
@@ -394,10 +394,10 @@ class Shadow:
                 element = self.executor_get_object(command, parent)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command, parent)
 
-        if force_find is False:
+        if not force_find:
             if element is None or self.is_present(element) is False:
                 raise ElementNotVisibleException("Element with XPath " + xpath + " is not present on screen")
 
@@ -420,7 +420,7 @@ class Shadow:
                 element = self.executor_get_object(command)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command)
 
         if force_find is False:
@@ -447,7 +447,7 @@ class Shadow:
                 element = self.executor_get_object(command, parent)
                 count = count + 1
 
-        if self.__implicit_wait == 0 and self.__implicit_wait == 0:
+        if self.__implicit_wait == 0 and self.__explicit_wait == 0:
             element = self.executor_get_object(command, parent)
 
         if force_find is False:
@@ -545,12 +545,12 @@ class Shadow:
         command = "return scrollTo(arguments[0]);"
         return self.executor_get_object(command, element)
 
-    def highlight(self, element, color="red", time_in_mili_seconds=4000):
+    def highlight(self, element, color="red", time_in_milli_seconds=4000):
         border = "3"
         original_style = element.get_attribute("style")
         style = "border: {border}px solid {color};".format(border=border, color=color)
         self.driver.execute_script("arguments[0].setAttribute('style', '{attr}');".format(attr=style), element)
-        time.sleep(time_in_mili_seconds)
+        time.sleep(time_in_milli_seconds)
         self.driver.execute_script("arguments[0].setAttribute('style', '{attr}');".format(attr=original_style), element)
 
 
