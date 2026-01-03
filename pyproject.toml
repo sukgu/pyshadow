@@ -1,0 +1,34 @@
+[project]
+name = "pyshadow"
+version = "0.0.6"
+authors = [
+  { name="Sushil Gupta", email="sushil106768@gmail.com" },
+]
+description = "Selenium plugin to manage shadow DOM elements on web page."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: Apache Software License',
+    'Operating System :: OS Independent',
+    'Topic :: Software Development',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Topic :: Software Development :: Quality Assurance',
+    'Topic :: Software Development :: Testing',
+    'Topic :: Utilities',
+    'Programming Language :: Python :: 3.8',
+]
+dependencies = [
+    'multipledispatch>=1.0.0', 'selenium>=4.15.1', 'webdriver-manager>=4.0.2'
+]
+
+[project.urls]
+Homepage = "https://github.com/sukgu/pyshadow/"
+"Bug Tracker" = "https://github.com/sukgu/pyshadow/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
